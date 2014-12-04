@@ -8,6 +8,10 @@ from re import compile
 class InvalidFormatError(IOError):
     pass
 
+class InvalidVersionError(InvalidFormatError):
+    pass
+
+#class Invalid
 
 def load_data(filename):
 
@@ -71,7 +75,7 @@ def load_data(filename):
     with open(filename, 'rb') as file:
         #print(headline.magic_bytes)
         #little-endian '<'
-        s = struct.Struct("<16s2s2s2sII")
+        s = struct.Struct("<16sH2s2sII")
         try:
             head = mmap.mmap(file.fileno(), 0, mmap.MAP_SHARED, mmap.PROT_READ)
             headline = s.unpack(head[:s.size])
@@ -87,20 +91,25 @@ def load_data(filename):
         if magic_bytes != b'6o\xfdo\xe2\xa4C\x90\x98\xb2t!\xbeurn':
             print('wrong magic spell!')
             raise InvalidFormatError
-        elif structures_num == 0:
+        if main_version != 3:
+            print('wrong version!', main_version)
+            raise InvalidVersionError
+        if structures_num == 0:
             print('nothing to read!')
             raise InvalidFormatError
-        elif structures_num*structure_size + offset != head.size():
-            print('every headline lies!')
+        if structures_num*structure_size + offset != head.size():
+            print('every headline lies!', structures_num*structure_size + offset, head.size())
             raise InvalidFormatError
         #elif structure_size !=
         else:
+            print('porównanie rozmiarów:', structures_num*structure_size + offset, head.size())
+            print('rozmiar dodatkowego pola w strukturze:', structure_size - 30)
             dtype = np.dtype([
             ('event_id', np.uint16),
             ('point', np.dtype("3float32")),
             ('mass', np.float32),
             ('velocity', np.dtype("3float32")),
-            ('shit, przez który nie śpię całą noc', np.dtype('0float32'))
+            ('dodatkowe pole', np.dtype('{}float32'.format(structure_size - 30)))
             ])
 
             data = np.memmap(filename, dtype=dtype, offset=offset, shape=(structures_num,), order='C')
@@ -111,5 +120,17 @@ def load_data(filename):
 
 if __name__ == '__main__':
     #to nie działa
-    data = load_data('/home/konrad/Pulpit/pwzn_jbzdak/tasks/zaj5/enwiki-20140903-pages-articles_part_1.xmlascii1000.bin')
-    print(data['event_id'], data['point'], data['velocity'], data['mass'])
+    data = load_data('zadA')
+    #data2 = load_data('zadB')
+    print('\n ZAD A')
+    print(data['event_id'])
+    print(data['point'])
+    print(data['velocity'])
+    print(data['mass'])
+
+    data1 = load_data('zadB')
+    print('\n ZAD B')
+    print(data1['event_id'])
+    print(data1['point'])
+    print(data1['velocity'])
+    print(data1['mass'])

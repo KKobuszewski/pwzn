@@ -44,7 +44,7 @@ def get_center_of_mass(event_id, data):
     return np.asanyarray([x, y, z], dtype=np.float32, order='C')
 
 
-def get_energy_spectrum(event_id, data, left, right, bins):
+def get_energy_spectrum(event_id, data, left=0, right=100, bins=10):
     """
     Zwraca wartości histogramu energii kinetycznej cząstek (tak: (m*v^2)/2).
     :param np.ndarray data: Wynik działania zadanie2.load_data
@@ -60,8 +60,11 @@ def get_energy_spectrum(event_id, data, left, right, bins):
     energies += np.asanyarray(data['velocity'][:, 1] * data['velocity'][:, 1], dtype=np.float64, order='C')
     energies += np.asanyarray(data['velocity'][:, 2] * data['velocity'][:, 2], dtype=np.float64, order='C')
     energies *= data['mass']
+    energies /= 2
     print(energies.shape)
+    print(energies[0], data['velocity'][0], data['mass'][0])
     values, bin_edges = np.histogram(energies, bins=bins, range=(left, right))
+    print(values.shape)
     return values
 
 
