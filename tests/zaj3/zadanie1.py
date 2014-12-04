@@ -4,7 +4,6 @@ import pathlib
 
 
 class TestClass(unittest.TestCase):
-
     TESTED_MODULE = None
 
     DATA_DIR = None
@@ -15,7 +14,9 @@ class TestClass(unittest.TestCase):
         load_data = cls.TESTED_MODULE.load_data
         cls.exc = None
         try:
-            cls.data = load_data(str(pathlib.Path(cls.DATA_DIR, "zaj3", "enwiki-20140903-pages-articles_part_3.xml.csv")))
+            print(pathlib.Path(cls.DATA_DIR, "zaj3", "enwiki-20140903-pages-articles_part_3.xml.csv"))
+            cls.data = load_data(
+                str(pathlib.Path(cls.DATA_DIR, "zaj3", "enwiki-20140903-pages-articles_part_3.xml.csv")))
             cls.data = list(map(list, cls.data))
         except Exception as e:
             cls.data = None
@@ -46,7 +47,9 @@ class TestClass(unittest.TestCase):
 
     def test_sugester_3(self):
         res = self.sugester('pyth', self.data)
-        for ii, (chr, prob) in enumerate([('o', 0.7794117647058824), ('a', 0.1323529411764706), ('e', 0.07352941176470588), ('i', 0.014705882352941176)]):
+        for ii, (chr, prob) in enumerate(
+                [('o', 0.7794117647058824), ('a', 0.1323529411764706), ('e', 0.07352941176470588),
+                 ('i', 0.014705882352941176)]):
             with self.subTest(ii):
                 self.assertEqual(res[ii][0], chr)
                 self.assertAlmostEqual(res[ii][1], prob, places=3)
