@@ -1,14 +1,23 @@
 # -*- coding: utf-8 -*-
 
+import mmap
+import struct
+import numpy as np
+from re import compile
 
 class InvalidFormatError(IOError):
     pass
 
+class InvalidVersionError(InvalidFormatError):
+    pass
+
+#class Invalid
 
 def load_data(filename):
 
     """
-
+    :param file path to be loaded
+    :return numpy.ndarray with data
     Funkcja ładuje dane z pliku binarnego. Plik ma następującą strukturę:
 
     * Nagłówek
@@ -16,12 +25,12 @@ def load_data(filename):
 
     Nagłówek ma następującą strukturę:
 
-    0. 16 "magicznych" bajtów te bajty to b'6o\xfdo\xe2\xa4C\x90\x98\xb2t!\xbeurn'
-    1. 2 bajty wersji "głównej"
-    2. 2 bajty wersji "pomniejszej"
-    3. 2 bajty określające rozmiar pojedyńczej struktury danych
-    4. 4 bajty określających ilość struktur
-    5. 4 bajty określających offset między początkiem pliku a danymi
+    0. 16 "magicznych" bajtów te bajty to b'6o\xfdo\xe2\xa4C\x90\x98\xb2t!\xbeurn' -> '16s'
+    1. 2 bajty wersji "głównej" -> '2s'
+    2. 2 bajty wersji "pomniejszej" -> '2s'
+    3. 2 bajty określające rozmiar pojedyńczej struktury danych -> '2s'
+    4. 4 bajty określających ilość struktur -> Integer 'I'
+    5. 4 bajty określających offset między początkiem pliku a danymi -> Integer 'I'
     6. Następnie mamy tyle struktur ile jest określone w nagłówku
 
     Struktura danych ma taką postać:
@@ -63,3 +72,65 @@ def load_data(filename):
 
     W zadaniu 3 będziecie na tym pliku robić obliczenia.
     """
+    with open(filename, 'rb') as file:
+        #print(headline.magic_bytes)
+        #little-endian '<'
+        s = struct.Struct("<16sH2s2sII")
+        try:
+            head = mmap.mmap(file.fileno(), 0, mmap.MAP_SHARED, mmap.PROT_READ)
+            headline = s.unpack(head[:s.size])
+        except Exception:
+            raise InvalidFormatError
+        magic_bytes = headline[0]
+        main_version = headline[1]
+        subversion = headline[2]
+        structure_size = int.from_bytes(headline[3], byteorder='little')
+        structures_num = headline[4]
+        offset = headline[5]
+        print('file:', filename, '\tsize:', structure_size, ',number of structures:', structures_num, ',offset:', offset)
+        if magic_bytes != b'6o\xfdo\xe2\xa4C\x90\x98\xb2t!\xbeurn':
+            print('wrong magic spell!')
+            raise InvalidFormatError
+        if main_version != 3:
+            print('wrong version!', main_version)
+            raise InvalidVersionError
+        if structures_num == 0:
+            print('nothing to read!')
+            raise InvalidFormatError
+        if structures_num*structure_size + offset != head.size():
+            print('every headline lies!', structures_num*structure_size + offset, head.size())
+            raise InvalidFormatError
+        #elif structure_size !=
+        else:
+            print('porównanie rozmiarów:', structures_num*structure_size + offset, head.size())
+            print('rozmiar dodatkowego pola w strukturze:', structure_size - 30)
+            dtype = np.dtype([
+            ('event_id', np.uint16),
+            ('point', np.dtype("3float32")),
+            ('mass', np.float32),
+            ('velocity', np.dtype("3float32")),
+            ('dodatkowe pole', np.dtype('{}float32'.format(structure_size - 30)))
+            ])
+
+            data = np.memmap(filename, dtype=dtype, offset=offset, shape=(structures_num,), order='C')
+            #print(data['event_id'], data['point'], data['velocity'], data['mass'])
+            return data #??? może tutaj zamienić na oddzielne numpie zwracane w krotce ???
+    raise InvalidFormatError
+
+
+if __name__ == '__main__':
+    #to nie działa
+    data = load_data('zadA')
+    #data2 = load_data('zadB')
+    print('\n ZAD A')
+    print(data['event_id'])
+    print(data['point'])
+    print(data['velocity'])
+    print(data['mass'])
+
+    data1 = load_data('zadB')
+    print('\n ZAD B')
+    print(data1['event_id'])
+    print(data1['point'])
+    print(data1['velocity'])
+    print(data1['mass'])

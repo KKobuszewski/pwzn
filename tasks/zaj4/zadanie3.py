@@ -36,7 +36,7 @@ class Integrator(object):
 
     PARAMS = {
         2: [1, 1],
-        3: [1, 3, 1],
+        3: [1, 4, 1],
         4: [1, 3, 3, 1],
         5: [7, 32, 12, 32, 7],
         6: [19, 75, 50, 50, 75, 19],
@@ -60,6 +60,43 @@ class Integrator(object):
     PARAMS[11][4] = PARAMS[11][-5] = -260550
     PARAMS[11][5] = 427368
 
+
+    @classmethod
+    def get_level_parameters(self, level):
+        """
+
+        :param int level: Liczba całkowita większa od jendości.
+        :return: Zwraca listę współczynników dla poszczególnych puktów
+                 w metodzie NC. Na przykład metoda NC stopnia 2 używa punktów
+                 na początku i końcu przedziału i każdy ma współczynnik 1,
+                 więc metoda ta zwraca [1, 1]. Dla NC 3 stopnia będzie to
+                 [1, 3, 1] itp.
+        :rtype: List of integers, damy generator, bo nas stać
+        """
+        if(level==2):
+            self.divisor = 1/2
+        if(level==3):
+            self.divisor = 1/3
+        if(level==4):
+            self.divisor = 3/8
+        if(level==5):
+            self.divisor = 4/90
+        if(level==6):
+            self.divisor = 5/288
+        if(level==7):
+            self.divisor = 1/140
+        if(level==8):
+            self.divisor = 7/17280
+        if(level==9):
+            self.divisor = 4/14175
+        if(level==10):
+            self.divisor = 9/89600
+        if(level==11):
+            self.divisor = 5/299376
+        #nie wiem czy trzeba podzielić
+        self.divisor /= (level-1)
+
+
     def __init__(self, level):
         """
         Funkcja ta inicjalizuje obiekt do działania dla danego stopnia metody NC
@@ -71,15 +108,48 @@ class Integrator(object):
     def integrate(self, func, func_range, num_evaluations):
         """
 
+
+        :type self: object
         :param callable func: Funkcja którą całkujemy
         :param tuple[int] func_range: Krotka zawierająca lewą i prawą granicę całkowania
         :param in tnum_evaluations:
         :return:
         """
+        #to jest liczba punktów w których wywołujemy funkcję
+        num_intervals = math.ceil(num_evaluations/self.level)
+        num_evaluations = self.level*math.ceil(num_evaluations/self.level)
+        h = (func_range[1] -func_range[0])/num_intervals
 
+        #print('num_intervals:', num_intervals)
+        #print('num_evaluations:', num_evaluations)
+        #print('h:', h)
+        #print('num_intervals:', 'a', func_range[0], 'b', func_range[1], 'długość', func_range[1] - func_range[0])
+
+        self.get_level_parameters(self.level)
+
+        coeffs = np.asarray(self.PARAMS[self.level])*self.divisor
+        #print('coeffs:\n ', coeffs, coeffs.shape)
+        baza = np.ones((num_intervals, self.level))
+        #print('np.ones:\n ', np.ones((num_intervals, self.level)))
+        #print('linspace:\n ', np.linspace(0., num_intervals-1, num_intervals).reshape(num_intervals, 1).T)
+        baza = baza * np.linspace(0., num_intervals-1, num_intervals).reshape(1, num_intervals).T
+        baza *= h
+        #print('baza\n', baza)
+        baza += func_range[0]
+        #print('baza\n', baza)
+        X = np.linspace(0., (func_range[1]-func_range[0])/(num_intervals), self.level, dtype=np.float32)
+        #print('x:\n ', X, X.shape)
+        X = baza+X
+        #print('x:\n ', X)
+        Y = func(X)
+        #print('f(x):\n ', Y)
+        Int_array = coeffs * Y *h
+        #print('f(x):\n ', Int_array)
+        return Int_array.sum()
 
 
 if __name__ == "__main__":
 
-    ii = Integrator(level=7)
-    print(ii.integrate(np.sin, (0, np.pi), 30))
+    ii = Integrator(level=3)
+    #print(ii.integrate(np.sin, (0, 2*np.pi), 1000))
+    print(ii.integrate(lambda x: x*x, (0, 1), 100))

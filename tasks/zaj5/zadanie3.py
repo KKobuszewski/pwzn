@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from tasks.zaj5.zadanie2 import  load_data # Musi tu być żeby testy przeszły
-
+from .zadanie2 import load_data  # Musi tu być żeby testy przeszły
 import numpy as np
 
 
@@ -18,6 +17,12 @@ def get_event_count(data):
 
     :param np.ndarray data: Wynik działania zadanie2.load_data
     """
+    #print('wynik działania funkcji get_event_count:', np.argmax(data['event_id']))
+    print('max index:', data['event_id'])
+    index = np.argmax(data['event_id'])
+    print('max index:', index)
+    print('max event value:', data['event_id'][index])
+    return data['event_id'][index]
 
 
 def get_center_of_mass(event_id, data):
@@ -25,10 +30,21 @@ def get_center_of_mass(event_id, data):
     Zwraca macierz numpy zawierajacą położenie x, y i z środka masy układu.
     :param np.ndarray data: Wynik działania zadanie2.load_data
     :return: Macierz 3 x 1
+
+    ??? PO CO MI EVENT_ID ???
+    PRZECIEŻ NIE BĘDĘ ROBIŁ TEGO W FORZE!?
+
     """
+    x = np.dot(data['mass'], data['point'][:, 0]) / np.sum(data['mass'])
+    y = np.dot(data['mass'], data['point'][:, 1]) / np.sum(data['mass'])
+    z = np.dot(data['mass'], data['point'][:, 2]) / np.sum(data['mass'])
+    print('środek masy:', x, y, z)
+    print(np.asanyarray([x, y, z], dtype=np.float32, order='C'))
+    print(np.asanyarray([x, y, z], dtype=np.float32, order='C').shape)
+    return np.asanyarray([x, y, z], dtype=np.float32, order='C')
 
 
-def get_energy_spectrum(event_id, data, left, right, bins):
+def get_energy_spectrum(event_id, data, left=0, right=100, bins=10):
     """
     Zwraca wartości histogramu energii kinetycznej cząstek (tak: (m*v^2)/2).
     :param np.ndarray data: Wynik działania zadanie2.load_data
@@ -40,9 +56,22 @@ def get_energy_spectrum(event_id, data, left, right, bins):
     Podpowiedż: np.histogram
     """
 
+    energies = np.asanyarray(data['velocity'][:, 0] * data['velocity'][:, 0], dtype=np.float64, order='C')
+    energies += np.asanyarray(data['velocity'][:, 1] * data['velocity'][:, 1], dtype=np.float64, order='C')
+    energies += np.asanyarray(data['velocity'][:, 2] * data['velocity'][:, 2], dtype=np.float64, order='C')
+    energies *= data['mass']
+    energies /= 2
+    print(energies.shape)
+    print(energies[0], data['velocity'][0], data['mass'][0])
+    values, bin_edges = np.histogram(energies, bins=bins, range=(left, right))
+    print(values.shape)
+    return values
+
+
 if __name__ == "__main__":
     data = load_data("...")
     # print(data['velocity'])
     print(get_event_count(data))
     print(get_center_of_mass(1, data))
+    # noinspection PyTypeChecker
     print(list(get_energy_spectrum(3, data, 0, 90, 100)))

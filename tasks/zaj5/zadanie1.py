@@ -27,6 +27,9 @@ def load_data(path):
     Podpowiedźź: starczą dwie linikji kodu definicja dtype oraz otwarcie macierzy.
     Typ danych jest złożony --- należy użyć Structured Array.
     """
+    dtype = np.dtype([('ngram', np.dtype("a7")), ('frequencies', np.uint32)])
+    data = np.memmap(path, dtype=dtype)
+    return data
 
 
 def suggester(input, data):
@@ -40,8 +43,7 @@ def suggester(input, data):
     :return: Dowolną strukturę którą można zaindeksować w następującyc sposób:
             ret[0][0] zwraca najbardziej prawdopodobną nasßępną literę. ret[0][1]
             jej prawdopodobieństwo. ret[-1][0] zwraca najmniej prawdopodobną literę.
-            Dane posortowane są względem prawodpodobieństwa, dane o tym samym prawdopodbieństwie
-            są sortowane po kolei.
+            Dane posortowane są względem prawodpodobieństwa.
 
     By wygenerować częstotliwości należy:
 
@@ -66,3 +68,23 @@ def suggester(input, data):
      ('e', 0.07352941176470588),
      ('i', 0.014705882352941176)]
     """
+    index_left = np.searchsorted(data['ngram'], np.asanyarray([input]))
+    index_right = np.searchsorted(data['ngram'], np.asanyarray([next_item(input)]))
+    #print(index_left, index_right, data[index_left:index_right])
+
+    #suggests = [(chr(d[0][-1]), d[1]) for d in data[index_left:index_right]]
+    #print(data[index_left:index_right])
+    sum_freqs = np.sum(data[index_left:index_right]['frequencies'])
+    #print('sum', sum_freqs)
+    suggests = [(chr(d[0][-1]), int(d[1])/int(sum_freqs)) for d in data[index_left:index_right]]
+
+    suggests.sort(key=lambda x: (-x[1], x[0].higher()))
+
+    print(suggests)
+    #test się krzaczy, gdyż dane nie są posortowane wg prawdopodobieństwa i kolejności alfabetycznej
+    # tylko wg prawdopodobienstwa
+    return suggests
+
+
+if __name__ == '__main__':
+    suggester('integr',load_data('/home/konrad/Pulpit/pwzn_bzdak/tasks/zaj5/enwiki-20140903-pages-articles_part_1.xmlascii1000.bin'))

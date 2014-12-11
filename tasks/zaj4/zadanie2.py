@@ -28,7 +28,7 @@ def calculate_neighbours(board):
 
     Podpowiedź II: Proszę uważać na komówki na bokach i rogach planszy.
     """
-
+    #http://docs.scipy.org/doc/numpy/user/basics.indexing.html
 
 def iterate(board):
 
