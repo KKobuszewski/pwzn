@@ -128,24 +128,15 @@ class Integrator(object):
         self.get_level_parameters(self.level)
 
         coeffs = np.asarray(self.PARAMS[self.level])*self.divisor
-        #print('coeffs:\n ', coeffs, coeffs.shape)
         baza = np.ones((num_intervals, self.level))
-        #print('np.ones:\n ', np.ones((num_intervals, self.level)))
-        #print('linspace:\n ', np.linspace(0., num_intervals-1, num_intervals).reshape(num_intervals, 1).T)
         baza = baza * np.linspace(0., num_intervals-1, num_intervals).reshape(1, num_intervals).T
         baza *= h
-        #print('baza\n', baza)
         baza += func_range[0]
-        #print('baza\n', baza)
-        X = np.linspace(0., (func_range[1]-func_range[0])/(num_intervals), self.level, dtype=np.float32)
-        #print('x:\n ', X, X.shape)
+        X = np.linspace(0., (func_range[1]-func_range[0])/num_intervals, self.level, dtype=np.float32)
         X = baza+X
-        #print('x:\n ', X)
         Y = func(X)
-        #print('f(x):\n ', Y)
-        Int_array = coeffs * Y *h
-        #print('f(x):\n ', Int_array)
-        return Int_array.sum()
+        int_array = coeffs * Y *h
+        return int_array.sum()
 
 
 if __name__ == "__main__":

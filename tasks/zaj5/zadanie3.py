@@ -6,7 +6,6 @@ import numpy as np
 
 def get_event_count(data):
     """
-
     Dane w pliku losowane są z takiego rozkładu:
     position, velocity: każda składowa losowana z rozkładu równomiernego 0-1
     mass: losowana z rozkładu równomiernego od 1 do 100.

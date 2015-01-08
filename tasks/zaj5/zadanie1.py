@@ -78,7 +78,7 @@ def suggester(input, data):
     #print('sum', sum_freqs)
     suggests = [(chr(d[0][-1]), int(d[1])/int(sum_freqs)) for d in data[index_left:index_right]]
 
-    suggests.sort(key=lambda x: (-x[1], x[0].higher()))
+    suggests.sort(key=lambda x: (-x[1], x[0]))
 
     print(suggests)
     #test się krzaczy, gdyż dane nie są posortowane wg prawdopodobieństwa i kolejności alfabetycznej

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import division
 
 import numpy as np
 
@@ -14,9 +15,10 @@ def linear_func(x, a, b):
     :param float a:
     :param float b:
     """
+    return a*x+b
 
 
-def chisquared(xy, a, b):
+def chisquared(xy, a=1, b=0):
     """
 
     Funkcja liczy sumę Chi^2 między wartościami zmierzonej funkcji a funkcją 
@@ -35,6 +37,9 @@ def chisquared(xy, a, b):
     :param float b:
     :return:
     """
+    print(xy.shape)
+    #print(linear_func(xy[0], a, b) - linear_func(xy[0], a, b))
+    return np.sum(((xy[:, 1] - linear_func(xy[:, 0], a, b))/xy[:, 2])**2)
 
 
 def least_sq(xy):
@@ -49,3 +54,21 @@ def least_sq(xy):
     :param xy: Jak w chisquared, uwaga: sigma_y nie jest potrzebne.
     :return: Krotka
     """
+    XX = np.sum(xy[:, 0]*xy[:, 0])
+    X = np.sum(xy[:, 0])
+    XY = np.sum(xy[:, 0]*xy[:, 1])
+    YY = np.sum(xy[:, 1]*xy[:, 1])
+    Y = np.sum(xy[:, 1])
+    N = xy.shape[0]
+    #print(xy.shape, N)
+    Delta = N*np.sum(XX) - np.sum(X)**2
+    A = np.sum((XX*Y - X*XY)/Delta)
+    B = np.sum((N*XY - X*Y)/Delta)
+
+    return A, B
+
+if __name__ == '__main__':
+    print(linear_func(1, 2, 0))
+    print(np.linspace(0, 10, 10))
+    print(linear_func(np.linspace(0, 10, 10), 5*np.ones((10,), dtype=np.float32), np.zeros((10,), dtype=np.float32)))
+    print(linear_func(np.linspace(0, 10, 10), 5, 1))

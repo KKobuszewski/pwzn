@@ -109,7 +109,7 @@ def load_data(filename):
             ('point', np.dtype("3float32")),
             ('mass', np.float32),
             ('velocity', np.dtype("3float32")),
-            ('dodatkowe pole', np.dtype('{}float32'.format(structure_size - 30)))
+            ('dodatkowe pole', np.dtype('{}byte'.format(structure_size - 30)))
             ])
 
             data = np.memmap(filename, dtype=dtype, offset=offset, shape=(structures_num,), order='C')
