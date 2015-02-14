@@ -1,6 +1,5 @@
 __author__ = 'karolina'
 # Written by Magnus Lie Hetland
-import numpy as np
 
 "Everybody's favourite sorting algorithm... :)"
 from time import time
@@ -37,7 +36,6 @@ def partition(list, start, end):
                 break                          # ...and start searching from the bottom.
 
     list[top] = pivot                          # Put the pivot in its place.
-    print (list[top])
     return top                                 # Return the split point
 
 
@@ -51,6 +49,3 @@ def quicksort(list, start, end):
 
 
 
-list=np.random.rand(1000)
-quicksort(list,0,999)
-print(time()-start)

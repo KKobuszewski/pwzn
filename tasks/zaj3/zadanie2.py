@@ -1,10 +1,7 @@
 __author__ = 'konrad'
 
 import csv
-from heapq import merge as hmerge
-import math
-import itertools
-import time
+
 
 def load_data_gen(path):
     """

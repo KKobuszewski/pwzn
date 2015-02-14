@@ -7,12 +7,10 @@
 
 import csv
 import io
-import os.path
 import bz2
 import re
 import itertools
 from xml.dom.pulldom import parse, START_ELEMENT
-from collections import Counter
 from collections import defaultdict
 
 

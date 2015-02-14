@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from numpy import char
 
 import numpy as np
+
 
 def next_item(input):
     """
@@ -12,7 +12,7 @@ def next_item(input):
     :param input:
     :return:
     """
-    return input[:-1] + chr(ord(input[-1])+1)
+    return input[:-1] + chr(ord(input[-1]) + 1)
 
 
 def load_data(path):
@@ -68,23 +68,21 @@ def suggester(input, data):
      ('e', 0.07352941176470588),
      ('i', 0.014705882352941176)]
     """
+    #wyszukujemy odpowiednich indeksów odpowiadających n-1gramowi
     index_left = np.searchsorted(data['ngram'], np.asanyarray([input]))
     index_right = np.searchsorted(data['ngram'], np.asanyarray([next_item(input)]))
-    #print(index_left, index_right, data[index_left:index_right])
 
-    #suggests = [(chr(d[0][-1]), d[1]) for d in data[index_left:index_right]]
-    #print(data[index_left:index_right])
+    #gdy mamy indeksy liczymy normalizację częstości i tworzymy listę ostatnich liter
     sum_freqs = np.sum(data[index_left:index_right]['frequencies'])
-    #print('sum', sum_freqs)
-    suggests = [(chr(d[0][-1]), int(d[1])/int(sum_freqs)) for d in data[index_left:index_right]]
+    suggests = [(chr(d[0][-1]), int(d[1]) / int(sum_freqs)) for d in data[index_left:index_right]]
 
+    # na koniec listę sortujemy prawdopodobieństwami
     suggests.sort(key=lambda x: (-x[1], x[0]))
 
     print(suggests)
-    #test się krzaczy, gdyż dane nie są posortowane wg prawdopodobieństwa i kolejności alfabetycznej
-    # tylko wg prawdopodobienstwa
     return suggests
 
 
 if __name__ == '__main__':
-    suggester('integr',load_data('/home/konrad/Pulpit/pwzn_bzdak/tasks/zaj5/enwiki-20140903-pages-articles_part_1.xmlascii1000.bin'))
+    suggester('integr',
+              load_data('/home/konrad/pwzn/pwzn/tasks/zaj5/enwiki-20140903-pages-articles_part_1.xmlascii1000.bin'))

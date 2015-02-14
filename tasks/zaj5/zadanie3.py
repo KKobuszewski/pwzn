@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from tasks.zaj5.zadanie2 import load_data # Musi tu być żeby testy przeszły
 import numpy as np
-from time import monotonic as time
+
+from tasks.zaj5.zadanie2 import load_data # Musi tu być żeby testy przeszły
+
 
 __author__ = 'konrad'
 
@@ -49,10 +50,11 @@ def count_energy_histogram(event_id, data, left, right, bins):
     :param int bins: ilość binów w historamie
     :return: macierz o rozmiarze 1 x bins
     """
-
-    dane = data[data['event_id'] == event_id]
-    energia = (1/2)*dane['mass']*np.linalg.norm(dane['velocity'], axis=1)**2
-    return np.histogram(energia, bins=bins, range=(left, right))
+    data = data[data['event_id'] == event_id]
+    #linalg -> linear algebra, liczy normę wektora
+    #normę wektora liczymy po 3 współrzędnych przestrzennych -> axis=1
+    energy = (1/2)*data['mass']*np.linalg.norm(data['velocity'], axis=1)**2
+    return np.histogram(energy, bins=bins, range=(left, right))
 
 if __name__ == "__main__":
     #tutaj pokażemy histogram, bo inaczej to bez sęsu jest

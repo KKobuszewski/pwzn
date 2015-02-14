@@ -120,11 +120,6 @@ class Integrator(object):
         num_evaluations = self.level*math.ceil(num_evaluations/self.level)
         h = (func_range[1] -func_range[0])/num_intervals
 
-        #print('num_intervals:', num_intervals)
-        #print('num_evaluations:', num_evaluations)
-        #print('h:', h)
-        #print('num_intervals:', 'a', func_range[0], 'b', func_range[1], 'długość', func_range[1] - func_range[0])
-
         self.get_level_parameters(self.level)
 
         coeffs = np.asarray(self.PARAMS[self.level])*self.divisor

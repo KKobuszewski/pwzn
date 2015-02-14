@@ -2,8 +2,10 @@
 
 import mmap
 import struct
-import numpy as np
 from time import monotonic as time
+
+import numpy as np
+
 
 class InvalidFormatError(IOError):
     pass
@@ -14,7 +16,6 @@ class InvalidVersionError(InvalidFormatError):
 #class Invalid
 
 def load_data(filename):
-
     """
     :param file path to be loaded
     :return numpy.ndarray with data

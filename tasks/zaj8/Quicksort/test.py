@@ -1,7 +1,7 @@
 __author__ = 'konrad'
 import pyximport; pyximport.install()
 from original_qsort import quicksort as qsortpy
-from qsort import quicksort#!!!!!!!!serio?
+from qsort import quicksort
 from time import monotonic as time
 
 import numpy as np
