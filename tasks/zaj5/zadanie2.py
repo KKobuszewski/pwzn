@@ -3,7 +3,7 @@
 import mmap
 import struct
 import numpy as np
-from re import compile
+from time import monotonic as time
 
 class InvalidFormatError(IOError):
     pass
@@ -40,7 +40,7 @@ def load_data(filename):
     * particle mass: float32 współrzędne kartezjańskie [kg]
     * particle_velocity: 3*float32 współrzędne kartezjańskie [m/s]
 
-    Struktura i nagłówek nie mają paddingu i są zapisani little-endian!
+    Struktura i nagłówek nie mają paddingu i są zapisane little-endian!
 
     Ten format pliku jest kompatybilny wstecznie i do przodu w ramach wersji
     "pomniejszej". W następujący sposób:
@@ -73,7 +73,6 @@ def load_data(filename):
     W zadaniu 3 będziecie na tym pliku robić obliczenia.
     """
     with open(filename, 'rb') as file:
-        #print(headline.magic_bytes)
         #little-endian '<'
         s = struct.Struct("<16sH2s2sII")
         try:
@@ -81,13 +80,15 @@ def load_data(filename):
             headline = s.unpack(head[:s.size])
         except Exception:
             raise InvalidFormatError
+
+        #odczytywanie nagłówka
         magic_bytes = headline[0]
         main_version = headline[1]
         subversion = headline[2]
         structure_size = int.from_bytes(headline[3], byteorder='little')
         structures_num = headline[4]
         offset = headline[5]
-        print('file:', filename, '\tsize:', structure_size, ',number of structures:', structures_num, ',offset:', offset)
+        #print('file:', filename, '\tsize:', structure_size, ',number of structures:', structures_num, ',offset:', offset)
         if magic_bytes != b'6o\xfdo\xe2\xa4C\x90\x98\xb2t!\xbeurn':
             print('wrong magic spell!')
             raise InvalidFormatError
@@ -100,37 +101,35 @@ def load_data(filename):
         if structures_num*structure_size + offset != head.size():
             print('every headline lies!', structures_num*structure_size + offset, head.size())
             raise InvalidFormatError
-        #elif structure_size !=
-        else:
-            print('porównanie rozmiarów:', structures_num*structure_size + offset, head.size())
-            print('rozmiar dodatkowego pola w strukturze:', structure_size - 30)
-            dtype = np.dtype([
+
+        #deklaracja struktury danych
+        dtype = np.dtype([
             ('event_id', np.uint16),
-            ('point', np.dtype("3float32")),
+            ('position', np.dtype("3float32")),
             ('mass', np.float32),
             ('velocity', np.dtype("3float32")),
-            ('dodatkowe pole', np.dtype('{}byte'.format(structure_size - 30)))
+            ('padding', np.dtype('{}a'.format(structure_size - 30)))
             ])
-
-            data = np.memmap(filename, dtype=dtype, offset=offset, shape=(structures_num,), order='C')
-            #print(data['event_id'], data['point'], data['velocity'], data['mass'])
-            return data #??? może tutaj zamienić na oddzielne numpie zwracane w krotce ???
+        data = np.memmap(filename, mode='r', dtype=dtype, offset=offset, shape=(structures_num,), order='C')
+        return data
     raise InvalidFormatError
-
 
 if __name__ == '__main__':
     #to nie działa
     data = load_data('zadA')
-    #data2 = load_data('zadB')
-    print('\n ZAD A')
-    print(data['event_id'])
-    print(data['point'])
-    print(data['velocity'])
-    print(data['mass'])
+    #print('\n ZAD A')
+    #print(data['event_id'])
+    #print(data['position'])
+    #print(data['velocity'])
+    #print(data['mass'])
+    #print('padding', data['padding'])
 
+    start = time()
     data1 = load_data('zadB')
+    print('\nczas ładowania zadB', time()-start)
     print('\n ZAD B')
-    print(data1['event_id'])
-    print(data1['point'])
-    print(data1['velocity'])
-    print(data1['mass'])
+    #print(data1['event_id'])
+    #print(data1['position'])
+    #print(data1['velocity'])
+    #print(data1['mass'])
+    #print('padding', data['padding'])

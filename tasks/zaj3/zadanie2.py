@@ -1,6 +1,7 @@
 __author__ = 'konrad'
 
 import csv
+from heapq import merge as hmerge
 import math
 import itertools
 import time
@@ -49,103 +50,146 @@ def merge(path1, path2, out_file):
 
     Najlepsza implementacja nie wymaga ma złożoność pamięciową ``O(1)``.
     Podpowiedź: merge sort. Nie jest to trywialne zadanie, ale jest do zrobienia.
-    """
-
+"""
     data1 = load_data_gen(path1)
     data2 = load_data_gen(path2)
-    t = time.time()
-    with open(out_file, 'w', encoding='utf-8') as outfile:
-        writer = csv.writer(outfile, dialect=csv.unix_dialect)
-        # print(itertools.islice(data2, None), type(itertools.islice(data2, None)))
-
-        #stop_loop = False
-        buffer = [None, None]
-        #iteracja = 0
+    with open(out_file, 'w', encoding='utf-8') as output:
+        writer = csv.writer(output, dialect=csv.unix_dialect)
+        buffer = [None, None]#zbuforowane elementy
         while True:
-            #iteracja += 1
-            #print('{}. iteracja'.format(iteracja), buffer)
-            #czytamy generatory data1, data2, musimy sprawdzić każdy z nich czy nie skończył im się plik do czytania
-            try:
-                d1 = next(data1)
-            except StopIteration:
-                #jeżeli skończył się plik data1 to dopisujemy same data2
+            #Sprawdzamy czy pierwszy element jest None
+            if buffer[0] is None:
                 try:
-                    d2 = next(data2)
+                    #Jeżeli pierwszy strumień się skończył wyrzuca wyjątek
+                    buffer[0] = next(data1)
                 except StopIteration:
-                    #jeżeli podniósł się ten wyjątek to oba pliki się skończyły
-                    break
-                else:
-                    if (buffer[0] is not None) and (buffer[0] < d2[0]):
-                        #print('skończył się data1, zapisano', buffer)
-                        writer.writerow(buffer)
-                        buffer = [None]
-                    elif (buffer[0] is not None) and (buffer[0] > d2[0]):
-                        pass
-                    elif (buffer[0] is not None) and (buffer[0] == d2[0]):
-                        d2[1] += buffer[1]
-                        buffer = [None]
-                    #print('skończył się data1, zapisano', d2)
-                    writer.writerow(d2)
+                    #jeśli trzeba opróżniamy bufor
+                    if buffer[1] is not None:
+                        writer.writerow(buffer[1])
+                    #Wypisujemy cały plik który się nie skończył
+                    for d in data2:
+                        writer.writerow(d)
+                    return
+            #Sprawdzamy czy drugi element jest None
+            if buffer[1] is None:
+                try:
+                    buffer[1] = next(data2)
+                except StopIteration:
+                    #jeśli trzeba opróżniamy bufor
+                    if buffer[0] is not None:
+                        writer.writerow(buffer[0])
+                    #Wypisujemy cały plik który się nie skończył
+                    for d in data1:
+                        writer.writerow(d)
+                    return
+            #gdy oba elementy nie są już None
+            #sprawdzamy kolejność tak by były posortowane
+            if buffer[0][0] > buffer[1][0]:
+                buffer = sorted(buffer)
+                data1, data2 = data2, data1
+            #Jak już są posortowane to sprawdzamy czy nie są równe
+            if buffer[0][0] == buffer[1][0]:
+                #dodajemy częstotliwości
+                writer.writerow([buffer[0][0], int(buffer[0][1]) + int(buffer[1][1])])
+                buffer = [None, None]
+            #Jeśli nie są równe
             else:
+                writer.writerow(buffer[0])
+                buffer[0] = None
+            """
+            #Fajniejsze rozwiązanie
+            it = iter(hmerge(data1, data2))
+            current = next(it)
+            while True:
                 try:
-                    d2 = next(data2)
-                except StopIteration:
-                    #jeżeli skończył się plik data2 to dopisujemy same data1
-                    if (buffer[0] is not None) and (buffer[0] < d1[0]):
-                        #print('skończył się data1, zapisano', buffer)
-                        writer.writerow(buffer)
-                        buffer = [None]
-                    elif (buffer[0] is not None) and (buffer[0] > d1[0]):
-                        pass
-                    elif (buffer[0] is not None) and (buffer[0] == d1[0]):
-                        d1[1] += buffer[1]
-                        buffer = [None]
-                    #print('skończył się data1, zapisano', d1)
-                    writer.writerow(d1)
-                else:
-                    if buffer[1] is None:
-                        if d1[0] == d2[0]:
-                            d1[1] += d2[1]
-                            #print('zapisano', d1)
-                            writer.writerow(d1)
-                            buffer = [None, None]
-                        elif d1[0] < d2[0]:
-                            #print('zapisano', d1)
-                            writer.writerow(d1)
-                            buffer = d2
-                        else:
-                            #print('zapisano', d2)
-                            writer.writerow(d2)
-                            buffer = d1
+                    nxt = next(it)
+                    if current[0] == nxt[0]:
+                        current[1] = int(current[1]) + nxt[1]
+                        nxt = current
                     else:
-                        triple = sorted([buffer, d1, d2], key=lambda x: x[0])
-                        #print(triple)
-                        if triple[0][0] != triple[1][0]:
-                            if triple[1][0] == triple[2][0]:
-                                triple[1][1] += triple[2][1]
-                                buffer = [None, None]
-                            else:
-                                buffer = triple[2]
-                            #print('zapisano:', triple[0], triple[1])
-                            writer.writerow(triple[0])
-                            writer.writerow(triple[1])
-                        else:
-                            if triple[0][0] == triple[1][0]:
-                                triple[0][1] += triple[1][1]
-                                buffer = triple[2]
-                            if triple[0][0] == triple[2][0]:
-                                triple[0][1] += triple[2][1]
-                                buffer = [None, None]
-                            #print(triple[0])
-                            writer.writerow(triple[0])
-            #print('bufor:', buffer)
+                        writer.writerow(current)
+                        current = nxt
+                except StopIteration:
+                    writer.writerow(nxt)
+                    break
+        """
+    # Rozwiązanie JBzdak
 
+#def merge(path1, path2, out_file):
+"""
+    Moja implementacja łączenia. Jest średnio elegancja jeśli chodzi o kod,
+    ale dość wydajna. Ta funkcja otwiera pliki i odpala merge_internal.
+
+    """
+"""
+    with open(path1) as f1, open(path2) as f2, open(out_file, 'w') as o:
+        i1 = csv.reader(f1, dialect=csv.unix_dialect)
+        i2 = csv.reader(f2, dialect=csv.unix_dialect)
+        out = csv.writer(o, dialect=csv.unix_dialect)
+
+        for r in merge_internal(i1, i2):
+            out.writerow(r)"""
+
+def merge_internal(i1, i2):
+    """
+
+    Moja implementacja łączenia. Jest średnio elegancja jeśli chodzi o kod,
+    ale dość wydajna.
+
+    r1 i r2 to właśnie łączone n-gramy.
+
+    Algorytm jest taki:
+
+    * Jeśli aktualnie pobrane obu plików ngramy są sobie równe to zwracamy sumę
+      częstotliwości i pobieramy dwa kolejne elementy.
+    * Jeśli nie są równe to zwracamy mniejszy i pobieramy nowy element
+      na jego miejsce. Możemy zwrócić mniejszy element ponieważ wiemy że
+      w drugim pliku nie ma już takiego samego n-gramu.
+
+    """
+    pass
+"""
+    r1, r2 = None, None # "Aktualne" elementy
+
+    while True:
+        if r1 is None: # Jeśli r1 nie jest Nonem to pobieramy następny ngram
+            try:
+                r1 = next(i1)
+            except StopIteration:
+                if r2 is not None: # r1 się skońvzyło wyrzucamy r2 i resztę elementów z i2
+                    yield r2
+                for r in i2:
+                    yield r
+                return
+        if r2 is None:  # Jeśli r2 nie jest Nonem to pobieramy następny ngram
+            try:
+                r2 = next(i2)
+            except StopIteration:
+                if r1 is not None: # r2 się skońvzyło wyrzucamy r1 i resztę elementów z i1
+                    yield r1
+                for r in i1:
+                    yield r
+                return
+
+        # Teraz mamy załadowane zarówno r1 jak i r2
+
+        if r1[0] > r2[0]: # Inwariant jest taki że w r1 zawsze jest mniejszy ngram od r2
+            r1, r2 = r2, r1 # Tutaj zamieniamy miejscami zarówno r jak i i
+            i1, i2 = i2, i1
+
+        if r1[0] == r2[0]: # Ngramy są sobie równe zwracamy sumę i ustawiamy oba na None (żeby oba się pobrały)
+            yield [r1[0], int(r1[1]) + int(r2[1])]
+            r1, r2 = None, None
+        else: # Jeśli nie są równe zwracamy mniejszy i ustawiamy go na None.
+            yield [r1[0], r1[1]]
+            r1 = None
+    """
 
 if __name__ == '__main__':
 
-    #merge(#'enwiki-20140903-pages-articles_part_0.xmlascii1000.csv',
+    merge(#'enwiki-20140903-pages-articles_part_0.xmlascii1000.csv',
     #      #'enwiki-20140903-pages-articles_part_2.xmlascii1000.csv',
     #      #'Merge2.csv')
     #      #'test1.csv', 'test2.csv', 'Test.csv')
-    #      'merge1.csv', 'merge3.csv', 'merge.csv')
-    merge("enwiki-20140903-pages-articles_part_0.xmlascii1000.csv","enwiki-20140903-pages-articles_part_3.xml.csv","out.csv")
+          'merge1.csv', 'merge3.csv', 'merge.csv')
+    #merge("enwiki-20140903-pages-articles_part_0.xmlascii1000.csv", "enwiki-20140903-pages-articles_part_3.xml.csv", "out.csv")

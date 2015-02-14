@@ -14,6 +14,19 @@ class TestClass(unittest.TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.filter_animals = lambda self, *args: cls.TESTED_MODULE.filter_animals(*args)
+        """expected_dict = {}
+        for anim in pickle.loads(EXPECTED):
+            if anim['genus'] in expected_dict:
+                if anim['sex'] is 'female':
+                    expected_dict[anim['genus']][1]=anim
+                else:
+                    expected_dict[anim['genus']][0]=anim
+            else:
+                expected_dict[anim['genus']]=[None,None]
+                if anim['sex'] is 'female':
+                    expected_dict[anim['genus']][1]=anim
+                else:
+                    expected_dict[anim['genus']][0]=anim"""
         cls.expected = pickle.loads(EXPECTED)
         cls.list = load_animals(True)
 

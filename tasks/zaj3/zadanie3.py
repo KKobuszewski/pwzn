@@ -12,6 +12,7 @@ import bz2
 import re
 import itertools
 from xml.dom.pulldom import parse, START_ELEMENT
+from collections import Counter
 from collections import defaultdict
 
 
@@ -97,10 +98,9 @@ def generate_ngrams(contents, ngram_len=7, default_return=True):
 
     :return: Funkcja zwraca słownik n-gram -> ilość wystąpień
     """
-
-    ngram_dict=defaultdict(lambda : 0)
+    ngram_dict = defaultdict(lambda: 0)
     for content in contents:
-        text = content[1]# + ' ' + content[0]
+        text = content[1]
         #print(text, len(text))
         for ii, letter in enumerate(text):
             if ii == len(text) - ngram_len + 1:
@@ -130,11 +130,12 @@ def save_ngrams(out_file, contents):
             w.writerow([ngram, freq])
 
 
-if __name__ == '__main__':
+if __name__ == \
+        '__main__':
     ngram_dict = generate_ngrams([("foo", "Ala ma kota a Marta ma Asa")], 3)
     por = {'la ': 1, 'Asa': 1, 'ma ': 2, 'Mar': 1, 'a A': 1, 'art': 1, 'Ala': 1, ' ma': 2, ' As': 1, 'a k': 1, 'ta ': 2, 'rta': 1, 'kot': 1, 'a m': 2, ' a ': 1, ' Ma': 1, 'ota': 1, 'a a': 1, ' ko': 1, 'a M': 1}
     #
     counter = 0
     for ngram, p in itertools.zip_longest(sorted(ngram_dict.items(), key=lambda x: x[0]), sorted(por.items(), key=lambda x: x[0])):
         counter += 1
-        print('{}.\t'.format(counter),ngram, '\t', p)
+        print('{}.\t'.format(counter), ngram, '\t', p)

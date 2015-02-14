@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from tasks.zaj5.zadanie2 import load_data # Musi tu być żeby testy przeszły
 import numpy as np
-from time import monotonic as time
 
 __author__ = 'konrad'
 
@@ -24,9 +23,7 @@ def get_center_of_mass(event_id, data):
     :return: Macierz 3 x 1
     """
     dane = data[data['event_id'] == event_id]
-    #by pomnożyć dane trzeba dopisać do masy nową oś, by mogła się zbroadcastować na 3 wymiary przestrzenne
-    #potem sumujemy po pierwszej osi
-    return np.sum(dane['mass'][:, np.newaxis]*dane['position'], axis=0)/np.sum(dane['mass'])
+    return np.sum(dane['position']*dane['mass'][:, np.newaxis], axis=0)/np.sum(dane['mass'])
 
 def get_energy_spectrum(event_id, data, left, right, bins):
     """
@@ -38,30 +35,14 @@ def get_energy_spectrum(event_id, data, left, right, bins):
     :return: macierz o rozmiarze 1 x bins
     Podpowiedż: np.histogram
     """
-    return count_energy_histogram(event_id, data, left, right, bins)[0]
-
-def count_energy_histogram(event_id, data, left, right, bins):
-    """\
-    :param int event_id: Wybiera tylko te wyniki co mają zadane id
-    :param np.ndarray data: Wynik działania zadanie2.load_data
-    :param int left: Lewa granica histogramowania
-    :param int right: Prawa granica historamowania
-    :param int bins: ilość binów w historamie
-    :return: macierz o rozmiarze 1 x bins
-    """
-
-    dane = data[data['event_id'] == event_id]
-    energia = (1/2)*dane['mass']*np.linalg.norm(dane['velocity'], axis=1)**2
-    return np.histogram(energia, bins=bins, range=(left, right))
+    dane = data[data['event_id'] <= event_id]
+    energia = dane['mass']*np.linalg.norm(dane['velocity'], axis=1)**2/2
+    return np.histogram(energia, bins=bins, range=(left, right))[0]
 
 if __name__ == "__main__":
-    #tutaj pokażemy histogram, bo inaczej to bez sęsu jest
-    import matplotlib.pyplot as plt
-    data = load_data("zadB")
-    print(data['velocity'])
+    #from matplotlib import
+    data = load_data("zadA")
+    #print(data['velocity'])
     print(get_event_count(data))
     print(get_center_of_mass(get_event_count(data), data))
-    hist, bin_edges = count_energy_histogram(get_event_count(data), data, 0, 90, 100)
-    plt.bar(bin_edges[:-1], hist, width = 1)
-    plt.xlim(min(bin_edges), max(bin_edges))
-    plt.show()
+    print(list(get_energy_spectrum(get_event_count(data), data, 0, 90, 100)))

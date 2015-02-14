@@ -114,6 +114,7 @@ class TestClass(unittest.TestCase):
 
     def test_merged_end(self):
         if not self.SHORT:
+            print(self.result[0][-30:])
             self.assertEqual(
                 [self.result[0][-10:], self.result[1][-10:]],
                 [['zzy and', 'zzy blo', 'zzy log', 'zzy sys', 'zzy yes', 'zzy, Mi', 'zzy, ps', 'zzy9QC ', 'zzyMemo', 'zzymemo'], [3, 1, 7, 2, 1, 1, 1, 1, 2, 1]]
