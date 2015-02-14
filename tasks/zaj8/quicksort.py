@@ -1,24 +1,14 @@
-__author__ = 'karolina'
-import numpy as np
-cimport numpy as np
-
-import cython
-cimport cython
-
+# -*- coding: utf-8 -*-
 # Written by Magnus Lie Hetland
 
-"Everybody's favourite sorting algorithm... :)"
+"""Everybody's favourite sorting algorithm... :)"""
 
+def partition(list, start, end):
+    pivot = list[end]                          # Partition around the last value
+    bottom = start-1                           # Start outside the area to be partitioned
+    top = end                                  # Ditto
 
-ctypedef np.float64_t DTYPE_t
-
-@cython.boundscheck(False)
-cdef unsigned int partition(np.ndarray[np.float64_t, ndim=1] list, signed int start, signed int end):
-    cdef np.float64_t pivot = list[end]                          # Partition around the last value
-    cdef signed int bottom = start-1                           # Start outside the area to be partitioned
-    cdef unsigned int top = end                                  # Ditto
-
-    cdef unsigned int done = 0
+    done = 0
     while not done:                            # Until all elements are partitioned...
 
         while not done:                        # Until we find an out of place element...
@@ -47,10 +37,11 @@ cdef unsigned int partition(np.ndarray[np.float64_t, ndim=1] list, signed int st
     return top                                 # Return the split point
 
 
-cpdef quicksort(np.ndarray[np.float64_t, ndim=1] list, signed int start, signed int end):
+def quicksort(list, start, end):
     if start < end:                            # If there are two or more elements...
         split = partition(list, start, end)    # ... partition the sublist...
         quicksort(list, start, split-1)        # ... and sort both halves.
         quicksort(list, split+1, end)
     else:
         return
+
