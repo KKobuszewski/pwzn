@@ -24,7 +24,7 @@ def load_data_list(path):
         return [[line[0], int(line[1])] for line in r]
 
 
-def merge(path1, path2, out_file):
+def merge2(path1, path2, out_file):
     """
     Funkcja pobiera nazwy dwóch plików z n-gramami (takie jak w poprzedmim
     zadaniu) i łączy zawartość tych plików i zapisuje do pliku w ścieżce ``out``.
@@ -112,20 +112,20 @@ def merge(path1, path2, out_file):
         """
     # Rozwiązanie JBzdak
 
-#def merge(path1, path2, out_file):
-"""
+def merge(path1, path2, out_file):
+    """
     Moja implementacja łączenia. Jest średnio elegancja jeśli chodzi o kod,
     ale dość wydajna. Ta funkcja otwiera pliki i odpala merge_internal.
 
     """
-"""
+
     with open(path1) as f1, open(path2) as f2, open(out_file, 'w') as o:
         i1 = csv.reader(f1, dialect=csv.unix_dialect)
         i2 = csv.reader(f2, dialect=csv.unix_dialect)
         out = csv.writer(o, dialect=csv.unix_dialect)
 
         for r in merge_internal(i1, i2):
-            out.writerow(r)"""
+            out.writerow(r)
 
 def merge_internal(i1, i2):
     """
@@ -145,7 +145,7 @@ def merge_internal(i1, i2):
 
     """
     pass
-"""
+
     r1, r2 = None, None # "Aktualne" elementy
 
     while True:
@@ -180,7 +180,7 @@ def merge_internal(i1, i2):
         else: # Jeśli nie są równe zwracamy mniejszy i ustawiamy go na None.
             yield [r1[0], r1[1]]
             r1 = None
-    """
+
 
 if __name__ == '__main__':
 
